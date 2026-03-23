@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pulse-bg: #0b0c10;
+  --color-pulse-card: rgba(255, 255, 255, 0.03);
+  --color-pulse-green: #10b981;
+  --color-pulse-green-hover: #059669;
+  --color-pulse-border: rgba(255, 255, 255, 0.1);
+  --color-pulse-text-muted: #9ca3af;
+  
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-pulse-bg);
+  color: #f3f4f6;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  background-image: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.05), transparent 40%);
+}
+
+/* Base custom classes to enforce the specific constraint requirements */
+.pulse-card {
+  @apply bg-pulse-card backdrop-blur-md border border-white/10 rounded-2xl;
+}
+
+.pulse-btn-primary {
+  @apply bg-pulse-green hover:bg-pulse-green-hover text-white px-6 py-2 rounded-md font-medium transition-colors;
+}
+
+.pulse-btn-outline {
+  @apply border border-white/10 hover:bg-white/5 text-white px-6 py-2 rounded-md font-medium transition-colors;
+}
+
+/* Smooth scrolling for anchor links */
+html {
+  scroll-behavior: smooth;
+}
