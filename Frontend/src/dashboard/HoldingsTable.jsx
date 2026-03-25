@@ -9,13 +9,13 @@ const HoldingsTable = ({
     { symbol: 'BTC/USD', name: 'Bitcoin', qty: '0.450', avgCost: '$52,140.00', ltp: '$68,420.10', currentValue: '$30,789.05', pnlValue: '+$7,326.05', pnlPercent: '+31.2%', isGain: true, iconColor: 'bg-amber-500' },
     { symbol: 'ETH/USD', name: 'Ethereum', qty: '4.20', avgCost: '$2,850.00', ltp: '$3,420.50', currentValue: '$14,366.10', pnlValue: '+$2,396.10', pnlPercent: '+20.0%', isGain: true, iconColor: 'bg-indigo-400' },
   ],
-  onExportCSV = () => {},
-  onFilterClick = () => {},
-  onActionClick = () => {}
+  onExportCSV = () => { },
+  onFilterClick = () => { },
+  onActionClick = () => { }
 }) => {
   return (
     <div className="bg-pulse-card border border-white/5 rounded-xl flex flex-col mb-8 overflow-hidden">
-      
+
       {/* Header Area */}
       <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -24,7 +24,7 @@ const HoldingsTable = ({
           </div>
           <h2 className="text-lg font-bold text-white">Active Holdings</h2>
         </div>
-        
+
         <div className="flex space-x-3">
           <button onClick={onExportCSV} className="text-xs font-bold text-gray-300 flex items-center space-x-2 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg transition-colors border border-white/5">
             <span>Export CSV</span>
@@ -45,7 +45,7 @@ const HoldingsTable = ({
               <th className="py-4 px-6 font-medium">Avg. Cost</th>
               <th className="py-4 px-6 font-medium">LTP</th>
               <th className="py-4 px-6 font-medium">Current Value</th>
-              <th className="py-4 px-6 font-medium">P&L</th>
+              {/* <th className="py-4 px-6 font-medium">P&L</th> */}
               <th className="py-4 px-6 font-medium text-center">Action</th>
             </tr>
           </thead>
@@ -55,36 +55,36 @@ const HoldingsTable = ({
                 {/* Instrument */}
                 <td className="py-4 px-6">
                   <div className="flex items-center space-x-4">
-                    <div className={`w-8 h-8 rounded shrink-0 ${holding.iconColor}`}></div>
+                    <div className={`w-8 h-8 rounded shrink-0 bg-emerald-500`}></div>
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-white tracking-wide">{holding.symbol}</span>
+                      <span className="text-sm font-bold text-white tracking-wide">{holding.instrumentToken}</span>
                       <span className="text-[10px] text-gray-500">{holding.name}</span>
                     </div>
                   </div>
                 </td>
-                
+
                 {/* QTY */}
                 <td className="py-4 px-6 text-sm text-gray-300 font-mono">
-                  {holding.qty}
+                  {holding.quantity}
                 </td>
-                
+
                 {/* Avg Cost */}
                 <td className="py-4 px-6 text-sm text-gray-300 font-mono">
-                  {holding.avgCost}
+                  {holding.averageCost}
                 </td>
-                
+
                 {/* LTP */}
                 <td className="py-4 px-6 text-sm text-gray-300 font-mono">
-                  {holding.ltp}
+                  {holding.averageCost}
                 </td>
-                
+
                 {/* Current Value */}
                 <td className="py-4 px-6 text-sm text-gray-300 font-mono">
-                  {holding.currentValue}
+                  {holding.averageCost * holding.quantity}
                 </td>
-                
+
                 {/* P&L */}
-                <td className="py-4 px-6">
+                {/* <td className="py-4 px-6">
                   <div className="flex flex-col">
                     <span className={`text-sm font-bold font-mono tracking-wide ${holding.isGain ? 'text-pulse-green' : 'text-rose-500'}`}>
                       {holding.pnlValue}
@@ -93,7 +93,7 @@ const HoldingsTable = ({
                       {holding.pnlPercent}
                     </span>
                   </div>
-                </td>
+                </td> */}
 
                 {/* Action */}
                 <td className="py-4 px-6 text-center">
@@ -111,8 +111,8 @@ const HoldingsTable = ({
       <div className="px-6 py-4 border-t border-white/5 flex items-center justify-between text-xs text-gray-500">
         <span>Showing {holdings.length} of {holdings.length} instruments</span>
         <div className="flex space-x-2">
-           <button className="px-2 py-1 hover:text-white transition-colors cursor-not-allowed opacity-50">&lt;</button>
-           <button className="px-2 py-1 hover:text-white transition-colors cursor-not-allowed opacity-50">&gt;</button>
+          <button className="px-2 py-1 hover:text-white transition-colors cursor-not-allowed opacity-50">&lt;</button>
+          <button className="px-2 py-1 hover:text-white transition-colors cursor-not-allowed opacity-50">&gt;</button>
         </div>
       </div>
 

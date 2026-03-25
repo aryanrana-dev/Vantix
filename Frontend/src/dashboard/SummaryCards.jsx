@@ -5,11 +5,11 @@ const SummaryCards = ({
   totalInvested = { value: '$210,450.00', subtext: 'Last updated 2m ago' },
   currentValue = { value: '$234,500.00', growth: '+11.4%', text: 'Overall Growth', isPositive: true },
   dayPnL = { value: '+$1,240.50', percentage: '(0.53%)', isPositive: true },
-  availableFunds = { value: '$24,500.00', subtext: 'Ready for deployment' }
+  availableFunds = '$24,500.00',
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      
+
       {/* Total Invested */}
       <div className="bg-pulse-card border border-white/5 rounded-xl p-6 relative overflow-hidden flex flex-col justify-between h-32">
         <Landmark size={80} className="absolute right-0 bottom-0 translate-x-4 translate-y-4 text-white/[0.03]" />
@@ -53,16 +53,16 @@ const SummaryCards = ({
         </div>
       </div>
 
-       {/* Available Funds */}
+      {/* Available Funds */}
       <div className="bg-pulse-card border border-white/5 rounded-xl p-6 relative overflow-hidden flex flex-col justify-between h-32">
         <Wallet size={80} className="absolute right-0 bottom-0 translate-x-4 translate-y-4 text-white/[0.03]" />
         <div>
           <h3 className="text-xs font-bold text-gray-400 mb-2">Available Funds</h3>
-          <div className="text-3xl font-bold text-white tracking-tight">{availableFunds.value}</div>
+          <div className="text-3xl font-bold text-white tracking-tight">${availableFunds}</div>
         </div>
-         <div className="flex items-center space-x-2 text-[10px] text-gray-500">
+        <div className="flex items-center space-x-2 text-[10px] text-gray-500">
           <div className="w-1.5 h-1.5 rounded-full bg-pulse-green"></div>
-          <span>{availableFunds.subtext}</span>
+          <span>{"Ready for deployment"}</span>
         </div>
       </div>
 

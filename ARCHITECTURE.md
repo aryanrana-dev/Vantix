@@ -13,8 +13,8 @@
 - **Runtime**: Node.js
 - **Framework**: Express.js - Fast, unopinionated, minimalist web framework for routing and middleware.
 - **Database ORM**: Mongoose - Elegant MongoDB object modeling for Node.js.
-- **Real-Time Communication**: Socket.io - For low-latency, bidirectional and event-based communication between the web clients and servers (Market Data).
-- **Caching & Pub/Sub**: Redis - In-memory data structure store, used as a database, cache, and message broker. Essential for fast market data retrieval and Socket.io scaling.
+- **Real-Time Communication**: ws (Native WebSockets) - For low-latency, bidirectional and event-based communication between the web clients and servers (Market Data).
+- **Caching & Pub/Sub**: Redis - In-memory data structure store, used as a database, cache, and message broker. Essential for fast market data retrieval and WebSocket scaling.
 - **Authentication**: 
   - JSONWebToken (JWT) - For secure, stateless authentication tokens.
   - bcrypt - For secure password hashing.
@@ -26,6 +26,11 @@ We strictly adhere to a **Smart Container / Dumb Component** architecture to ens
 ### Directory Structure
 ```
 /src
+├── App.css
+├── App.jsx
+├── index.css
+├── main.jsx
+├── /assets
 ├── /dashboard
 │   ├── DiversityChart.jsx
 │   ├── HoldingsLayout.jsx
@@ -129,7 +134,7 @@ We strictly adhere to a **Smart Container / Dumb Component** architecture to ens
   - `GET /api/portfolio/positions` - Fetch current day intraday positions (MIS).
   - `GET /api/wallet/balance` - Retrieve cash/margin balances.
 
-### WebSocket Architecture (Socket.io + Redis)
+### WebSocket Architecture (ws + Redis)
 - **Channels / Rooms**:
   - `live_feeds`: Broadcasts ticks (LTP, Volume, High, Low, Close).
   - `market_depth`: Broadcasts Top 5 Bid/Ask for active instruments.
@@ -224,18 +229,18 @@ We strictly adhere to a **Smart Container / Dumb Component** architecture to ens
 - [ ] Setup Context API structures (`MarketDataContext`, `UserWalletContext`).
 - [ ] Wrap the terminal and dashboard with Providers.
 - [ ] Connect `OrderModal.jsx` and `Watchlist.jsx` to local and global contexts.
-- [ ] Create a mock data service (`data.js`) to simulate realistic market ticks natively inside the browser for demo purposes.
+- [x] Create a mock data service (`data.js`) to simulate realistic market ticks natively inside the browser for demo purposes (Backend `data.js` also created, solely for testing purposes).
 
 ### Phase 3: API Backend Initialization (Node.js & MongoDB)
-- [ ] Initialize Express.js backend repository.
+- [x] Initialize Express.js backend repository.
 - [ ] Provision MongoDB clusters and create the Mongoose models (User, Order, Holdings, Ledger).
 - [ ] Implement JWT Authentication and build `/api/auth` endpoints.
 - [ ] Build atomic ledger transactions (ensure User cash balances logically map to DB sessions/transactions).
 - [ ] Develop `/api/orders` logic (Margin validation -> Database write).
 
 ### Phase 4: WebSocket Integration & Real-Time Sync
-- [ ] Integrate Socket.io on the Node.js server with a Redis Pub/Sub adapter.
+- [ ] Integrate native WebSockets (ws) on the Node.js server with a Redis Pub/Sub adapter.
 - [ ] Implement a Mock Tick Generator worker to continuously emit LTP updates to `live_feeds`.
-- [ ] Connect the React frontend to Socket.io.
+- [ ] Connect the React frontend to native WebSockets.
 - [ ] Subscribe `Watchlist.jsx` and `ChartArea.jsx` to live streams.
 - [ ] Implement visual flashes (green/red ticks) when prices change in the UI.

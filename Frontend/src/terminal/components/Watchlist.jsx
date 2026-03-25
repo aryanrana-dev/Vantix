@@ -1,18 +1,19 @@
 import React from 'react';
+import { useEffect } from 'react';
 import { Plus } from 'lucide-react';
+import { useMarketData } from './MarketLivePrice';
 
 const Watchlist = ({
-  stocks = [
-    { symbol: 'NVDA', name: 'NVIDIA CORP.', price: '875.24', change: '+4.28%', isGain: true },
-    { symbol: 'AAPL', name: 'APPLE INC.', price: '172.45', change: '-0.12%', isGain: false },
-    { symbol: 'TSLA', name: 'TESLA INC.', price: '168.30', change: '+1.45%', isGain: true },
-    { symbol: 'BTC/USD', name: 'BITCOIN', price: '64,280.00', change: '+2.10%', isGain: true },
-    { symbol: 'ETH/USD', name: 'ETHEREUM', price: '3,450.12', change: '-1.05%', isGain: false },
-  ],
   selectedSymbol = 'NVDA',
   onAddClick = () => { },
   onSelectStock = () => { },
 }) => {
+  const stocks = ["NVDA", "AAPL", "TSLA"];
+  const { marketData, updateSymbols } = useMarketData();
+
+  useEffect(() => {
+    updateSymbols(stocks);
+  }, []);
   const updateSelectedStock = (stock) => {
     onSelectStock(stock.symbol);
   };
@@ -34,12 +35,12 @@ const Watchlist = ({
 
       {/* List */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-        {stocks.map((stock) => {
+        {marketData.map((stock) => {
           const isSelected = selectedSymbol === stock.symbol;
           return (
             <div
               key={stock.symbol}
-              onClick={() => updateSelectedStock(stock)}
+              // onClick={() => updateSelectedStock(stock)}
               className={`flex items-center justify-between p-4 cursor-pointer border-b border-white/[0.02] transition-colors relative
                 ${isSelected ? 'bg-pulse-green/5' : 'hover:bg-white/5'}
               `}
@@ -61,8 +62,8 @@ const Watchlist = ({
 
               {/* Right col: Price & Change */}
               <div className="flex flex-col items-end relative z-10">
-                <span className={`text-sm font-bold tracking-wider ${stock.isGain ? 'text-pulse-green' : 'text-rose-500'}`}>
-                  {stock.change}
+                <span className={`text-sm font-bold tracking-wider ${stock.price > stock.previousClose ? 'text-pulse-green' : 'text-rose-500'}`}>
+                  {stock.percent}
                 </span>
                 <span className="text-sm font-mono text-white">
                   ${stock.price}

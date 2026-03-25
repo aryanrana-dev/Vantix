@@ -7,6 +7,7 @@ import ChartArea from './ChartArea';
 import OrderBook from './OrderBook';
 import { WATCHLIST_STOCKS, STOCK_DETAILS, CHART_DATA } from '../data';
 import OrderModal from './OrderModal';
+import { MarketLivePriceProvider } from './MarketLivePrice';
 
 const TerminalLayout = ({
   // We can pipe props through if the parent dictates,
@@ -35,39 +36,41 @@ const TerminalLayout = ({
 
   return (
     <div>
-      <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#0A0F16] font-sans selection:bg-pulse-green/30">
-        <TopNav 
-          activeTab="markets" 
-          onTabSelect={handleNavClick} 
-          onLogoClick={() => navigate('/')} 
-        />
-        <div className="flex flex-1 overflow-hidden">
-          <LeftNav activeRoute="watchlist" onRouteSelect={handleNavClick} />
-          <Watchlist
-            stocks={WATCHLIST_STOCKS}
-            onSelectStock={updateSelectedStock}
-            selectedSymbol={selectedStock}
+      <MarketLivePriceProvider>
+        <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#0A0F16] font-sans selection:bg-pulse-green/30">
+          <TopNav
+            activeTab="markets"
+            onTabSelect={handleNavClick}
+            onLogoClick={() => navigate('/')}
           />
-          <div className="flex flex-col flex-1 relative bg-[#0b0c10]">
-            <ChartArea
-              selectedStock={selectedStock}
-              currentPrice={currentData.price}
-              chartData={CHART_DATA}
+          <div className="flex flex-1 overflow-hidden">
+            <LeftNav activeRoute="watchlist" onRouteSelect={handleNavClick} />
+            <Watchlist
+              stocks={WATCHLIST_STOCKS}
+              onSelectStock={updateSelectedStock}
+              selectedSymbol={selectedStock}
             />
-            <OrderBook
-              bids={currentData.bids}
-              asks={currentData.asks}
-              onBuyClick={updateOrderModalOpen}
-            />
+            <div className="flex flex-col flex-1 relative bg-[#0b0c10]">
+              <ChartArea
+                selectedStock={selectedStock}
+                currentPrice={currentData.price}
+                chartData={CHART_DATA}
+              />
+              <OrderBook
+                bids={currentData.bids}
+                asks={currentData.asks}
+                onBuyClick={updateOrderModalOpen}
+              />
+            </div>
           </div>
         </div>
-      </div>
-      <div className="z-50">
-        <OrderModal 
-          isOpen={isOrderModalOpen} 
-          onClose={updateOrderModalOpen} 
-        />
-      </div>
+        <div className="z-50">
+          <OrderModal
+            isOpen={isOrderModalOpen}
+            onClose={updateOrderModalOpen}
+          />
+        </div>
+      </MarketLivePriceProvider>
     </div>
   );
 };

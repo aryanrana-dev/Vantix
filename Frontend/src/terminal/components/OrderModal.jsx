@@ -1,18 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Activity, Settings2, ArrowRight } from 'lucide-react';
 
 const OrderModal = ({
   isOpen = false,
   onClose = () => {},
   stock = { symbol: 'NVDA', name: 'NVIDIA CORP', price: 124.32 },
-  orderState = { action: 'BUY', product: 'MIS', type: 'Limit', qty: 10, limitPrice: 124.30 },
+  initialOrderState = { action: 'BUY', product: 'MIS', type: 'Limit', qty: 10, limitPrice: 124.30 },
   onOrderChange = () => {},
   onSubmit = () => {}
 }) => {
+  const [localOrder, setLocalOrder] = useState(initialOrderState);
+
+  useEffect(() => {
+    if (isOpen) {
+      setLocalOrder(initialOrderState);
+    }
+  }, [isOpen]);
+
+  const handleOrderChange = (updates) => {
+    const newOrder = { ...localOrder, ...updates };
+    setLocalOrder(newOrder);
+    onOrderChange(newOrder);
+  };
+
   if (!isOpen) return null;
 
-  const isBuy = orderState.action === 'BUY';
-  const marginRequired = (orderState.qty * (orderState.type === 'Market' ? stock.price : orderState.limitPrice)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const isBuy = localOrder.action === 'BUY';
+  const marginRequired = (localOrder.qty * (localOrder.type === 'Market' ? stock.price : localOrder.limitPrice)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const availableBalance = '24,500.00';
 
   return (
@@ -58,7 +72,7 @@ const OrderModal = ({
         {/* Action Toggle (BUY / SELL) */}
         <div className="flex bg-[#0a0f16] rounded-lg p-1 border border-white/5 mb-6">
           <button 
-            onClick={() => onOrderChange({ action: 'BUY' })}
+            onClick={() => handleOrderChange({ action: 'BUY' })}
             className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${
               isBuy ? 'bg-pulse-green text-[#0a0f16] shadow-md' : 'text-gray-400 hover:text-white'
             }`}
@@ -66,7 +80,7 @@ const OrderModal = ({
             BUY
           </button>
           <button 
-            onClick={() => onOrderChange({ action: 'SELL' })}
+            onClick={() => handleOrderChange({ action: 'SELL' })}
             className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${
               !isBuy ? 'bg-red-500 text-white shadow-md' : 'text-gray-400 hover:text-white'
             }`}
@@ -80,17 +94,17 @@ const OrderModal = ({
           <label className="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-2 block">Product</label>
           <div className="flex bg-[#0a0f16] rounded-lg p-1 border border-white/5">
             <button 
-              onClick={() => onOrderChange({ product: 'MIS' })}
+              onClick={() => handleOrderChange({ product: 'MIS' })}
               className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${
-                orderState.product === 'MIS' ? 'bg-white/10 text-pulse-green border border-white/10' : 'text-gray-400 hover:text-white'
+                localOrder.product === 'MIS' ? 'bg-white/10 text-pulse-green border border-white/10' : 'text-gray-400 hover:text-white'
               }`}
             >
               Intraday (MIS)
             </button>
             <button 
-              onClick={() => onOrderChange({ product: 'CNC' })}
+              onClick={() => handleOrderChange({ product: 'CNC' })}
               className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${
-                orderState.product === 'CNC' ? 'bg-white/10 text-pulse-green border border-white/10' : 'text-gray-400 hover:text-white'
+                localOrder.product === 'CNC' ? 'bg-white/10 text-pulse-green border border-white/10' : 'text-gray-400 hover:text-white'
               }`}
             >
               Delivery (CNC)
@@ -105,9 +119,9 @@ const OrderModal = ({
             {['Market', 'Limit', 'Stop Loss'].map(type => (
               <button 
                 key={type}
-                onClick={() => onOrderChange({ type })}
+                onClick={() => handleOrderChange({ type })}
                 className={`flex-1 py-2 text-xs font-medium rounded-md transition-colors ${
-                  orderState.type === type ? 'border border-pulse-green/50 text-white' : 'text-gray-400 hover:text-white'
+                  localOrder.type === type ? 'border border-pulse-green/50 text-white' : 'text-gray-400 hover:text-white'
                 }`}
               >
                 {type}
@@ -123,8 +137,8 @@ const OrderModal = ({
             <div className="relative">
               <input 
                 type="number" 
-                value={orderState.qty}
-                onChange={(e) => onOrderChange({ qty: Number(e.target.value) })}
+                value={localOrder.qty}
+                onChange={(e) => handleOrderChange({ qty: Number(e.target.value) })}
                 className="w-full bg-[#0a0f16] border border-white/10 rounded-lg p-3 text-white font-mono placeholder-gray-600 focus:outline-none focus:border-pulse-green/50"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 font-bold tracking-widest">SHARES</span>
@@ -136,9 +150,9 @@ const OrderModal = ({
             <div className="relative">
               <input 
                 type="number" 
-                value={orderState.limitPrice}
-                disabled={orderState.type === 'Market'}
-                onChange={(e) => onOrderChange({ limitPrice: Number(e.target.value) })}
+                value={localOrder.limitPrice}
+                disabled={localOrder.type === 'Market'}
+                onChange={(e) => handleOrderChange({ limitPrice: Number(e.target.value) })}
                 className="w-full bg-[#0a0f16] border border-white/10 rounded-lg p-3 text-white font-mono placeholder-gray-600 focus:outline-none focus:border-pulse-green/50 disabled:opacity-50"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 font-bold tracking-widest">USD</span>

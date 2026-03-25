@@ -5,6 +5,7 @@ import LeftNav from '../terminal/components/LeftNav';
 import SummaryCards from './SummaryCards';
 import PortfolioAnalysis from './PortfolioAnalysis';
 import HoldingsTable from './HoldingsTable';
+import { USERS, ORDERS, HOLDINGS, TRANSACTIONS } from '../../../Backend/data';
 
 const HoldingsLayout = () => {
   const navigate = useNavigate();
@@ -43,11 +44,11 @@ const HoldingsLayout = () => {
             </div>
           </div>
 
-          <SummaryCards />
+          <SummaryCards availableFunds={USERS[0].wallet.cashBalance} />
 
           <PortfolioAnalysis />
 
-          <HoldingsTable />
+          <HoldingsTable holdings={HOLDINGS} />
 
         </div>
       </div>

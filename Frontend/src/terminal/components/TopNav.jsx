@@ -29,19 +29,6 @@ const TopNav = ({
         >
           VANTIX
         </div>
-
-        <nav className="hidden md:flex items-center space-x-6">
-          {navLinks.map((link) => (
-            <button
-              key={link.id}
-              onClick={() => onTabSelect(link.id)}
-              className={`text-sm font-medium transition-colors ${activeTab === link.id ? 'text-white' : 'text-gray-400 hover:text-white'
-                }`}
-            >
-              {link.label}
-            </button>
-          ))}
-        </nav>
       </div>
 
       {/* Center Section: Global Search */}
