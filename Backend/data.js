@@ -11,7 +11,7 @@ export const USERS = [
     name: "Demo Trader",
     wallet: {
       cashBalance: 250000.00,
-      usedMargin: 12500.50
+      usedMargin: 0
     },
     settings: {
       darkMode: true,

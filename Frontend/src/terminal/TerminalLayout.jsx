@@ -5,7 +5,7 @@ import LeftNav from './LeftNav';
 import Watchlist from './Watchlist';
 import ChartArea from './ChartArea';
 import OrderBook from './OrderBook';
-import { WATCHLIST_STOCKS, STOCK_DETAILS, CHART_DATA } from '../data';
+import { WATCHLIST_STOCKS, STOCK_DETAILS, CHART_DATA } from './data';
 import OrderModal from './OrderModal';
 import { MarketLivePriceProvider } from './MarketLivePrice';
 
@@ -22,6 +22,7 @@ const TerminalLayout = ({
   const handleNavClick = (id) => {
     if (id === 'portfolio' || id === 'holdings') navigate('/portfolio');
     if (id === 'markets' || id === 'watchlist') navigate('/terminal');
+    if (id === 'orders') navigate('/orders');
   };
 
   const updateSelectedStock = (symbol) => {
@@ -46,7 +47,7 @@ const TerminalLayout = ({
           <div className="flex flex-1 overflow-hidden">
             <LeftNav activeRoute="watchlist" onRouteSelect={handleNavClick} />
             <Watchlist
-              stocks={WATCHLIST_STOCKS}
+              stocks={['AAPL', 'NVDA', 'TSLA']}
               onSelectStock={updateSelectedStock}
               selectedSymbol={selectedStock}
             />
@@ -66,6 +67,7 @@ const TerminalLayout = ({
         </div>
         <div className="z-50">
           <OrderModal
+            selectedSymbol={selectedStock}
             isOpen={isOrderModalOpen}
             onClose={updateOrderModalOpen}
           />

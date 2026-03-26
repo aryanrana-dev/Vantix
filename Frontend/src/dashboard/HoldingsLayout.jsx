@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import TopNav from '../terminal/components/TopNav';
-import LeftNav from '../terminal/components/LeftNav';
+import TopNav from '../terminal/TopNav';
+import LeftNav from '../terminal/LeftNav';
 import SummaryCards from './SummaryCards';
 import PortfolioAnalysis from './PortfolioAnalysis';
 import HoldingsTable from './HoldingsTable';
@@ -14,6 +14,7 @@ const HoldingsLayout = () => {
   const handleNavClick = (id) => {
     if (id === 'markets' || id === 'watchlist') navigate('/terminal');
     if (id === 'portfolio' || id === 'holdings' || id === 'dashboard') navigate('/portfolio');
+    if (id === 'orders') navigate('/orders');
   };
 
   return (

@@ -52,32 +52,32 @@ export const STOCK_DETAILS = {
       { price: '168.40', size: '42.60', depth: 60 },
     ],
   },
-  'BTC/USD': {
-    price: '64,280.00',
-    change: '+2.10%',
-    isGain: true,
-    bids: [
-      { price: '64,275.50', size: '0.42', depth: 85 },
-      { price: '64,270.00', size: '1.25', depth: 100 },
-    ],
-    asks: [
-      { price: '64,285.20', size: '0.15', depth: 30 },
-      { price: '64,290.00', size: '2.50', depth: 100 },
-    ],
-  },
-  'ETH/USD': {
-    price: '3,450.12',
-    change: '-1.05%',
-    isGain: false,
-    bids: [
-      { price: '3,448.50', size: '12.50', depth: 60 },
-      { price: '3,445.00', size: '45.20', depth: 100 },
-    ],
-    asks: [
-      { price: '3,452.12', size: '5.40', depth: 25 },
-      { price: '3,455.00', size: '18.90', depth: 80 },
-    ],
-  }
+  // 'BTC/USD': {
+  //   price: '64,280.00',
+  //   change: '+2.10%',
+  //   isGain: true,
+  //   bids: [
+  //     { price: '64,275.50', size: '0.42', depth: 85 },
+  //     { price: '64,270.00', size: '1.25', depth: 100 },
+  //   ],
+  //   asks: [
+  //     { price: '64,285.20', size: '0.15', depth: 30 },
+  //     { price: '64,290.00', size: '2.50', depth: 100 },
+  //   ],
+  // },
+  // 'ETH/USD': {
+  //   price: '3,450.12',
+  //   change: '-1.05%',
+  //   isGain: false,
+  //   bids: [
+  //     { price: '3,448.50', size: '12.50', depth: 60 },
+  //     { price: '3,445.00', size: '45.20', depth: 100 },
+  //   ],
+  //   asks: [
+  //     { price: '3,452.12', size: '5.40', depth: 25 },
+  //     { price: '3,455.00', size: '18.90', depth: 80 },
+  //   ],
+  // }
 };
 
 export const CHART_DATA = {

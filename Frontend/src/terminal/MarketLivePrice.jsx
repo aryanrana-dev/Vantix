@@ -20,7 +20,7 @@ export function MarketLivePriceProvider({ children }) {
     }, [symbols]);
 
     useEffect(() => {
-        const ws = new WebSocket("http://localhost:3000");
+        const ws = new WebSocket("ws://localhost:3000");
         wsRef.current = ws;
 
         ws.onopen = () => {

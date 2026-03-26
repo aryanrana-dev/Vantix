@@ -2,21 +2,23 @@ const express = require("express");
 const app = express();
 const { WebSocketServer } = require("ws");
 const port = 3000;
+require("dotenv").config();
 
 const server = app.listen(port, () => {
     console.log("Listening to localhost:3000")
 })
 
 const wss = new WebSocketServer({ server });
-let symbols = [];
-
 wss.on("connection", (ws) => {
     console.log("Client connected");
-    ws.on("message", async (data) => {
+    let clientSymbols = [];
+    let intervalId = null;
+
+    const sendUpdate = async () => {
+        if (clientSymbols.length === 0) return;
         try {
-            symbols = JSON.parse(data.toString());
-            const marketData = await Promise.all(symbols.map(async (symbol) => {
-                let stockURL = `https://financialmodelingprep.com/stable/quote?symbol=${symbol}&apikey=sgv9puFAWNtjFYtQe8N96X8mM4HLwEl2`;
+            const marketData = await Promise.all(clientSymbols.map(async (symbol) => {
+                let stockURL = `https://financialmodelingprep.com/stable/quote?symbol=${symbol}&apikey=${process.env.STOCK_API_KEY_2}`;
                 let res = await fetch(stockURL);
                 let jsonArray = await res.json();
                 let json = Array.isArray(jsonArray) ? jsonArray[0] : jsonArray;
@@ -24,20 +26,41 @@ wss.on("connection", (ws) => {
                 return {
                     symbol: json?.symbol || symbol,
                     name: json?.name || symbol,
-                    price: json?.price || 0,
-                    change: json?.change || 0,
-                    changePercent: json?.changePercentage || json?.changePercent || 0,
-                    high: json?.dayHigh || json?.high || 0,
-                    low: json?.dayLow || json?.low || 0,
-                    previousClose: json?.previousClose || json?.price || 0
+                    price: json?.price.toFixed(2) || 0,
+                    change: json?.change.toFixed(2) || 0,
+                    changePercent: json?.changePercentage.toFixed(2) || json?.changePercent.toFixed(2) || 0,
+                    high: json?.dayHigh.toFixed(2) || json?.high.toFixed(2) || 0,
+                    low: json?.dayLow.toFixed(2) || json?.low.toFixed(2) || 0,
+                    previousClose: json?.previousClose.toFixed(2) || json?.price.toFixed(2) || 0
                 };
             }));
-            ws.send(JSON.stringify(marketData));
+            if (ws.readyState === 1) { // 1 is OPEN
+                ws.send(JSON.stringify(marketData));
+            }
         } catch (error) {
-            console.log(error);
+            console.log("Error fetching market data:", error);
         }
-    })
+    };
+
+    ws.on("message", async (data) => {
+        try {
+            clientSymbols = JSON.parse(data.toString());
+            console.log("Subscribed to:", clientSymbols);
+
+            // Send immediate update
+            await sendUpdate();
+
+            // Setup interval if not already set
+            if (!intervalId) {
+                intervalId = setInterval(sendUpdate, 10000);
+            }
+        } catch (error) {
+            console.log("Error parsing symbols:", error);
+        }
+    });
+
     ws.on("close", () => {
         console.log("Client disconnected");
-    })
-})
+        if (intervalId) clearInterval(intervalId);
+    });
+});

@@ -1,53 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import { X, Activity, Settings2, ArrowRight } from 'lucide-react';
+import { useMarketData } from './MarketLivePrice';
+import { USERS } from '../../../Backend/data';
 
 const OrderModal = ({
   isOpen = false,
-  onClose = () => {},
-  stock = { symbol: 'NVDA', name: 'NVIDIA CORP', price: 124.32 },
-  initialOrderState = { action: 'BUY', product: 'MIS', type: 'Limit', qty: 10, limitPrice: 124.30 },
-  onOrderChange = () => {},
-  onSubmit = () => {}
+  onClose = () => { },
+  selectedSymbol,
 }) => {
+  const { marketData } = useMarketData();
+
+  // Guard: Find the stock or use a placeholder to prevent crashes
+  const stock = (marketData && marketData.find((el) => el.symbol === selectedSymbol)) || {
+    symbol: selectedSymbol || '---',
+    name: 'Stock Data Unavailable',
+    price: 0
+  };
+
+  const initialOrderState = {
+    price: stock.price || 0,
+    action: 'BUY',
+    product: 'MIS',
+    type: 'Limit',
+    qty: 10,
+    limitPrice: stock.price || 0
+  };
+
   const [localOrder, setLocalOrder] = useState(initialOrderState);
 
   useEffect(() => {
     if (isOpen) {
       setLocalOrder(initialOrderState);
     }
-  }, [isOpen]);
+  }, [isOpen, selectedSymbol]);
 
   const handleOrderChange = (updates) => {
     const newOrder = { ...localOrder, ...updates };
     setLocalOrder(newOrder);
-    onOrderChange(newOrder);
   };
 
   if (!isOpen) return null;
 
   const isBuy = localOrder.action === 'BUY';
-  const marginRequired = (localOrder.qty * (localOrder.type === 'Market' ? stock.price : localOrder.limitPrice)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const marginRequired = (localOrder.qty * (localOrder.type === 'Market' ? Number(stock.price || 0) : Number(localOrder.limitPrice || 0))).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const availableBalance = '24,500.00';
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={onClose}
     >
       {/* Floating Close Button (Top Right) */}
-      <button 
-        onClick={onClose} 
+      <button
+        onClick={onClose}
         className="absolute top-8 right-8 p-3 rounded-xl bg-[#11161d] border border-white/10 text-gray-400 hover:text-white transition-colors"
       >
         <X size={20} />
       </button>
 
       {/* Main Form Card */}
-      <div 
+      <div
         className="w-[420px] bg-pulse-card border border-white/10 rounded-xl p-6 flex flex-col shadow-2xl"
         onClick={(e) => e.stopPropagation()} // Prevent clicking inside card from closing modal
       >
-        
+
         {/* Header Section */}
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-center space-x-3">
@@ -59,11 +75,11 @@ const OrderModal = ({
               <span className="text-[10px] text-gray-400 uppercase tracking-widest">{stock.name}</span>
             </div>
           </div>
-          
+
           <div className="flex flex-col items-end">
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 rounded-full bg-pulse-green shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-              <span className="text-xl font-bold text-pulse-green">${stock.price.toFixed(2)}</span>
+              <span className="text-xl font-bold text-pulse-green">${Number(stock.price || 0).toFixed(2)}</span>
             </div>
             <span className="text-[9px] text-pulse-green/70 uppercase font-bold tracking-widest mt-1">Live Market Data</span>
           </div>
@@ -71,19 +87,17 @@ const OrderModal = ({
 
         {/* Action Toggle (BUY / SELL) */}
         <div className="flex bg-[#0a0f16] rounded-lg p-1 border border-white/5 mb-6">
-          <button 
+          <button
             onClick={() => handleOrderChange({ action: 'BUY' })}
-            className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${
-              isBuy ? 'bg-pulse-green text-[#0a0f16] shadow-md' : 'text-gray-400 hover:text-white'
-            }`}
+            className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${isBuy ? 'bg-pulse-green text-[#0a0f16] shadow-md' : 'text-gray-400 hover:text-white'
+              }`}
           >
             BUY
           </button>
-          <button 
+          <button
             onClick={() => handleOrderChange({ action: 'SELL' })}
-            className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${
-              !isBuy ? 'bg-red-500 text-white shadow-md' : 'text-gray-400 hover:text-white'
-            }`}
+            className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${!isBuy ? 'bg-red-500 text-white shadow-md' : 'text-gray-400 hover:text-white'
+              }`}
           >
             SELL
           </button>
@@ -93,19 +107,17 @@ const OrderModal = ({
         <div className="mb-6">
           <label className="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-2 block">Product</label>
           <div className="flex bg-[#0a0f16] rounded-lg p-1 border border-white/5">
-            <button 
+            <button
               onClick={() => handleOrderChange({ product: 'MIS' })}
-              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${
-                localOrder.product === 'MIS' ? 'bg-white/10 text-pulse-green border border-white/10' : 'text-gray-400 hover:text-white'
-              }`}
+              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${localOrder.product === 'MIS' ? 'bg-white/10 text-pulse-green border border-white/10' : 'text-gray-400 hover:text-white'
+                }`}
             >
               Intraday (MIS)
             </button>
-            <button 
+            <button
               onClick={() => handleOrderChange({ product: 'CNC' })}
-              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${
-                localOrder.product === 'CNC' ? 'bg-white/10 text-pulse-green border border-white/10' : 'text-gray-400 hover:text-white'
-              }`}
+              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${localOrder.product === 'CNC' ? 'bg-white/10 text-pulse-green border border-white/10' : 'text-gray-400 hover:text-white'
+                }`}
             >
               Delivery (CNC)
             </button>
@@ -117,12 +129,11 @@ const OrderModal = ({
           <label className="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-2 block">Order Type</label>
           <div className="flex bg-[#0a0f16] rounded-lg p-1 border border-white/5 space-x-1">
             {['Market', 'Limit', 'Stop Loss'].map(type => (
-              <button 
+              <button
                 key={type}
                 onClick={() => handleOrderChange({ type })}
-                className={`flex-1 py-2 text-xs font-medium rounded-md transition-colors ${
-                  localOrder.type === type ? 'border border-pulse-green/50 text-white' : 'text-gray-400 hover:text-white'
-                }`}
+                className={`flex-1 py-2 text-xs font-medium rounded-md transition-colors ${localOrder.type === type ? 'border border-pulse-green/50 text-white' : 'text-gray-400 hover:text-white'
+                  }`}
               >
                 {type}
               </button>
@@ -135,8 +146,8 @@ const OrderModal = ({
           <div className="flex-1">
             <label className="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-2 block">Quantity</label>
             <div className="relative">
-              <input 
-                type="number" 
+              <input
+                type="number"
                 value={localOrder.qty}
                 onChange={(e) => handleOrderChange({ qty: Number(e.target.value) })}
                 className="w-full bg-[#0a0f16] border border-white/10 rounded-lg p-3 text-white font-mono placeholder-gray-600 focus:outline-none focus:border-pulse-green/50"
@@ -144,12 +155,12 @@ const OrderModal = ({
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 font-bold tracking-widest">SHARES</span>
             </div>
           </div>
-          
+
           <div className="flex-1">
             <label className="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-2 block">Limit Price</label>
             <div className="relative">
-              <input 
-                type="number" 
+              <input
+                type="number"
                 value={localOrder.limitPrice}
                 disabled={localOrder.type === 'Market'}
                 onChange={(e) => handleOrderChange({ limitPrice: Number(e.target.value) })}
@@ -179,11 +190,10 @@ const OrderModal = ({
         </div>
 
         {/* Submit Button */}
-        <button 
-          onClick={onSubmit}
-          className={`w-full py-4 rounded-lg font-bold uppercase tracking-widest text-[#0a0f16] flex items-center justify-center space-x-2 transition-all transform hover:-translate-y-0.5 shadow-lg ${
-            isBuy ? 'bg-pulse-green hover:bg-[#059669] shadow-pulse-green/20' : 'bg-red-500 hover:bg-red-600 shadow-red-500/20'
-          }`}
+        <button
+          onClick={() => { console.log(localOrder) }}
+          className={`w-full py-4 rounded-lg font-bold uppercase tracking-widest text-[#0a0f16] flex items-center justify-center space-x-2 transition-all transform hover:-translate-y-0.5 shadow-lg ${isBuy ? 'bg-pulse-green hover:bg-[#059669] shadow-pulse-green/20' : 'bg-red-500 hover:bg-red-600 shadow-red-500/20'
+            }`}
         >
           <span>Place {isBuy ? 'Buy' : 'Sell'} Order</span>
           <ArrowRight size={18} />

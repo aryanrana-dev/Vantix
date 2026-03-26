@@ -4,16 +4,19 @@ import { Plus } from 'lucide-react';
 import { useMarketData } from './MarketLivePrice';
 
 const Watchlist = ({
+  stocks = [],
   selectedSymbol = 'NVDA',
   onAddClick = () => { },
   onSelectStock = () => { },
 }) => {
-  const stocks = ["NVDA", "AAPL", "TSLA"];
   const { marketData, updateSymbols } = useMarketData();
 
   useEffect(() => {
-    updateSymbols(stocks);
-  }, []);
+    if (stocks.length > 0) {
+      const symbols = stocks.map(s => typeof s === 'string' ? s : s.symbol);
+      updateSymbols(symbols);
+    }
+  }, [stocks]);
   const updateSelectedStock = (stock) => {
     onSelectStock(stock.symbol);
   };
@@ -40,7 +43,7 @@ const Watchlist = ({
           return (
             <div
               key={stock.symbol}
-              // onClick={() => updateSelectedStock(stock)}
+              onClick={() => updateSelectedStock(stock)}
               className={`flex items-center justify-between p-4 cursor-pointer border-b border-white/[0.02] transition-colors relative
                 ${isSelected ? 'bg-pulse-green/5' : 'hover:bg-white/5'}
               `}
@@ -62,8 +65,8 @@ const Watchlist = ({
 
               {/* Right col: Price & Change */}
               <div className="flex flex-col items-end relative z-10">
-                <span className={`text-sm font-bold tracking-wider ${stock.price > stock.previousClose ? 'text-pulse-green' : 'text-rose-500'}`}>
-                  {stock.percent}
+                <span className={`text-sm font-bold tracking-wider ${stock.changePercent >= 0 ? 'text-pulse-green' : 'text-rose-500'}`}>
+                  {stock.changePercent > 0 ? '+' : ''}{Number(stock.changePercent).toFixed(2)}%
                 </span>
                 <span className="text-sm font-mono text-white">
                   ${stock.price}
