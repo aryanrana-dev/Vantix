@@ -30,7 +30,6 @@ export function MarketLivePriceProvider({ children }) {
         };
 
         ws.onmessage = (event) => {
-            console.log(event.data)
             const response = JSON.parse(event.data);
             setMarketData(response);
         };

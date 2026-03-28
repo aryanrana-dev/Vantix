@@ -1,8 +1,29 @@
 const express = require("express");
+const mongoose = require("mongoose");
+const Order = require("./models/order.js");
 const app = express();
+const cors = require("cors")
 const { WebSocketServer } = require("ws");
 const port = 3000;
 require("dotenv").config();
+
+app.use(cors());
+app.use(express.json());
+
+main().catch(err => console.log(err))
+
+async function main() {
+    await mongoose.connect("mongodb://127.0.0.1:27017/vantix");
+    console.log("Connected to MongoDB");
+}
+
+app.post("/orders", async (req, res) => {
+    const data = req.body;
+    console.log(data);
+    let newOrder = new Order(data);
+    await newOrder.save();
+    console.log("Order saved successfully");
+})
 
 const server = app.listen(port, () => {
     console.log("Listening to localhost:3000")

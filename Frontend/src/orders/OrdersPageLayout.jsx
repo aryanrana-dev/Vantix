@@ -5,15 +5,7 @@ import LeftNav from '../terminal/LeftNav';
 import OrderBookHeader from './OrderBookHeader';
 import OrdersTable from './OrdersTable';
 import OrdersSummaryCards from './OrdersSummaryCards';
-
-// Default mock data to render exactly like the provided design
-const MOCK_ORDERS = [
-  { time: '14:02:45', type: 'B', instrumentTitle: 'NVDA.NAS', instrumentDesc: 'NVIDIA CORP', product: 'MIS', qty: 140, price: '$922.45', status: 'COMPLETED' },
-  { time: '13:58:12', type: 'S', instrumentTitle: 'TSLA.NAS', instrumentDesc: 'TESLA MOTORS', product: 'CNC', qty: 50, price: '$172.10', status: 'REJECTED' },
-  { time: '13:45:00', type: 'B', instrumentTitle: 'AAPL.NAS', instrumentDesc: 'APPLE INC', product: 'MIS', qty: '2,500', price: '$189.34', status: 'COMPLETED' },
-  { time: '13:12:33', type: 'B', instrumentTitle: 'BTC.USD', instrumentDesc: 'BITCOIN / US DOLLAR', product: 'CNC', qty: '0.4500', price: '$64,281.00', status: 'COMPLETED' },
-  { time: '12:55:09', type: 'S', instrumentTitle: 'ETH.USD', instrumentDesc: 'ETHEREUM / US DOLLAR', product: 'MIS', qty: '12.00', price: '$3,412.18', status: 'COMPLETED' },
-];
+import { useAccountManager } from '../AccountManager';
 
 const MOCK_SUMMARY = {
   executionRatio: { value: '94.2%', change: '+12%', isPositive: true },
@@ -23,8 +15,8 @@ const MOCK_SUMMARY = {
 
 const OrdersPageLayout = ({
   // Header Props
-  activeTab = 'Executed',
-  tabs = ['Open (2)', 'Executed', 'GTT', 'Rejected'],
+  activeTab = 'Open',
+  tabs = ['Open', 'Executed', 'GTT', 'Rejected'],
   onTabClick = () => { },
   searchValue = '',
   onSearchChange = () => { },
@@ -32,7 +24,6 @@ const OrdersPageLayout = ({
   onDownloadClick = () => { },
 
   // Table Props
-  orders = MOCK_ORDERS,
   onOrderActionClick = () => { },
   onPageChange = () => { },
   currentPage = 1,
@@ -45,6 +36,7 @@ const OrdersPageLayout = ({
   summaryStats = MOCK_SUMMARY,
 }) => {
   const navigate = useNavigate();
+  const { orders = [] } = useAccountManager() || {};
 
   // Navigation handlers
   const handleNavClick = (id) => {

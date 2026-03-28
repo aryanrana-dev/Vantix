@@ -1,4 +1,4 @@
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Hero from './Hero';
 import About from './About';
@@ -24,9 +24,15 @@ const Footer = () => (
 );
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
+  const handleNavClick = (id) => {
+    if (id == 'terminal') navigate('/terminal');
+  }
+
   return (
     <div className="bg-pulse-bg text-white min-h-screen pt-16">
-      <Navbar />
+      <Navbar onRouteSelect={handleNavClick} />
       <Hero />
       <About />
       <Pricing />

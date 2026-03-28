@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Activity, Settings2, ArrowRight } from 'lucide-react';
 import { useMarketData } from './MarketLivePrice';
 import { USERS } from '../../../Backend/data';
+import { useAccountManager } from '../AccountManager';
 
 const OrderModal = ({
   isOpen = false,
@@ -9,6 +10,7 @@ const OrderModal = ({
   selectedSymbol,
 }) => {
   const { marketData } = useMarketData();
+  const { updateOrders } = useAccountManager();
 
   // Guard: Find the stock or use a placeholder to prevent crashes
   const stock = (marketData && marketData.find((el) => el.symbol === selectedSymbol)) || {
@@ -18,12 +20,17 @@ const OrderModal = ({
   };
 
   const initialOrderState = {
+    symbol: stock.symbol,
+    name: stock.name,
     price: stock.price || 0,
     action: 'BUY',
     product: 'MIS',
-    type: 'Limit',
+    type: 'LIMIT',
     qty: 10,
-    limitPrice: stock.price || 0
+    limitPrice: stock.price || 0,
+    status: 'OPEN',
+    date: '',
+    time: ''
   };
 
   const [localOrder, setLocalOrder] = useState(initialOrderState);
@@ -128,7 +135,7 @@ const OrderModal = ({
         <div className="mb-6">
           <label className="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-2 block">Order Type</label>
           <div className="flex bg-[#0a0f16] rounded-lg p-1 border border-white/5 space-x-1">
-            {['Market', 'Limit', 'Stop Loss'].map(type => (
+            {['MARKET', 'LIMIT', 'STOP LOSS'].map(type => (
               <button
                 key={type}
                 onClick={() => handleOrderChange({ type })}
@@ -162,7 +169,7 @@ const OrderModal = ({
               <input
                 type="number"
                 value={localOrder.limitPrice}
-                disabled={localOrder.type === 'Market'}
+                disabled={localOrder.type === 'MARKET'}
                 onChange={(e) => handleOrderChange({ limitPrice: Number(e.target.value) })}
                 className="w-full bg-[#0a0f16] border border-white/10 rounded-lg p-3 text-white font-mono placeholder-gray-600 focus:outline-none focus:border-pulse-green/50 disabled:opacity-50"
               />
@@ -191,7 +198,12 @@ const OrderModal = ({
 
         {/* Submit Button */}
         <button
-          onClick={() => { console.log(localOrder) }}
+          onClick={() => {
+            const date = new Date().toLocaleDateString();
+            const time = new Date().toLocaleTimeString();
+            updateOrders({ ...localOrder, date: date, time: time });
+            onClose();
+          }}
           className={`w-full py-4 rounded-lg font-bold uppercase tracking-widest text-[#0a0f16] flex items-center justify-center space-x-2 transition-all transform hover:-translate-y-0.5 shadow-lg ${isBuy ? 'bg-pulse-green hover:bg-[#059669] shadow-pulse-green/20' : 'bg-red-500 hover:bg-red-600 shadow-red-500/20'
             }`}
         >
