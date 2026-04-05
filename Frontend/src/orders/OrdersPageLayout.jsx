@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNav from '../terminal/TopNav';
 import LeftNav from '../terminal/LeftNav';
@@ -23,20 +23,34 @@ const OrdersPageLayout = ({
   onDateRangeClick = () => { },
   onDownloadClick = () => { },
 
-  // Table Props
-  onOrderActionClick = () => { },
-  onPageChange = () => { },
-  currentPage = 1,
-  totalPages = 5,
-  totalItems = 42,
-  startIndex = 1,
-  endIndex = 10,
-
   // Summary Props
   summaryStats = MOCK_SUMMARY,
 }) => {
   const navigate = useNavigate();
-  const { orders = [] } = useAccountManager() || {};
+  const { orders, fetchOrders } = useAccountManager() || {};
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  // Pagination Logic
+  const itemsPerPage = 10;
+  const safeOrders = Array.isArray(orders) ? orders : [];
+  const totalItems = safeOrders.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+
+  // Bound current page strictly
+  const actualCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const startIndex = totalItems === 0 ? 0 : (actualCurrentPage - 1) * itemsPerPage + 1;
+  const endIndex = Math.min(actualCurrentPage * itemsPerPage, totalItems);
+
+  const paginatedOrders = safeOrders.slice(startIndex > 0 ? startIndex - 1 : 0, endIndex);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   // Navigation handlers
   const handleNavClick = (id) => {
@@ -75,10 +89,10 @@ const OrdersPageLayout = ({
 
             {/* Data Table Section */}
             <OrdersTable
-              orders={orders}
-              onActionClick={onOrderActionClick}
-              onPageChange={onPageChange}
-              currentPage={currentPage}
+              orders={paginatedOrders}
+              onActionClick={() => { }}
+              onPageChange={handlePageChange}
+              currentPage={actualCurrentPage}
               totalPages={totalPages}
               totalItems={totalItems}
               startIndex={startIndex}

@@ -1,5 +1,6 @@
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LayoutGrid, Eye, Briefcase, FileText, Wallet, HelpCircle, LogOut } from 'lucide-react';
+import axios from 'axios';
 
 const NavItem = ({ icon: Icon, label, active, onClick, bottom }) => (
   <button
@@ -21,8 +22,19 @@ const LeftNav = ({
   activeRoute = 'dashboard',
   onRouteSelect = () => { },
   onHelpSelect = () => { },
-  onLogoutSelect = () => { },
 }) => {
+  const navigate = useNavigate();
+  const onSignoutSelect = async () => {
+    const response = await axios.get("http://localhost:3000/signout", {
+      withCredentials: true
+    });
+    if (response.data.success) {
+      navigate("/");
+      console.log("Signed out successfully");
+    } else {
+      console.log("Failed to sign out");
+    }
+  }
   return (
     <aside className="w-[240px] h-[calc(100vh-56px)] bg-[#0A0F16] border-r border-white/5 flex flex-col py-6 shrink-0 z-10">
 
@@ -82,7 +94,7 @@ const LeftNav = ({
         <NavItem
           icon={LogOut}
           label="Sign Out"
-          onClick={onLogoutSelect}
+          onClick={onSignoutSelect}
         />
       </div>
 

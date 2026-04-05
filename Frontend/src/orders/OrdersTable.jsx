@@ -1,4 +1,3 @@
-import React from 'react';
 import { MoreVertical, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const OrdersTable = ({
@@ -11,6 +10,14 @@ const OrdersTable = ({
   startIndex = 1,
   endIndex = 10,
 }) => {
+  const getPageNumbers = () => {
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (currentPage <= 3) return [1, 2, 3, 4, '...', totalPages];
+    if (currentPage >= totalPages - 2) return [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+  };
+  const pages = getPageNumbers();
+
   return (
     <div className="w-full bg-pulse-card rounded-xl border border-pulse-border overflow-hidden mb-6">
       <div className="overflow-x-auto">
@@ -143,9 +150,9 @@ const OrdersTable = ({
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          {[1, 2, 3, '...', 5].map((page, idx) => (
+          {pages.map((page, idx) => (
             <button
-              key={idx}
+              key={`${idx}-${page}`}
               onClick={() => typeof page === 'number' ? onPageChange(page) : undefined}
               disabled={page === '...'}
               className={`w-7 h-7 flex items-center justify-center rounded text-sm transition-colors ${page === currentPage

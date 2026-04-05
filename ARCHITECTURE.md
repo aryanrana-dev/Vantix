@@ -24,13 +24,17 @@
 We strictly adhere to a **Smart Container / Dumb Component** architecture to ensure high reusability, testing predictability, and clear separation of concerns.
 
 ### Directory Structure
-```
 /src
 ├── App.css
 ├── App.jsx
 ├── index.css
 ├── main.jsx
+├── AccountManager.jsx
 ├── /assets
+├── /Authentication
+│   ├── Login.jsx
+│   ├── OnboardingPage.jsx
+│   └── signup.jsx
 ├── /dashboard
 │   ├── DiversityChart.jsx
 │   ├── HoldingsLayout.jsx
@@ -46,16 +50,21 @@ We strictly adhere to a **Smart Container / Dumb Component** architecture to ens
 │   ├── Navbar.jsx
 │   ├── Pricing.jsx
 │   └── Support.jsx
+├── /orders
+│   ├── OrderBookHeader.jsx
+│   ├── OrdersPageLayout.jsx
+│   ├── OrdersSummaryCards.jsx
+│   └── OrdersTable.jsx
 └── /terminal
-    ├── /components
-    │   ├── ChartArea.jsx
-    │   ├── LeftNav.jsx
-    │   ├── OrderBook.jsx
-    │   ├── OrderModal.jsx
-    │   ├── TerminalLayout.jsx
-    │   ├── TopNav.jsx
-    │   └── Watchlist.jsx
-    └── data.js
+    ├── ChartArea.jsx
+    ├── data.js
+    ├── LeftNav.jsx
+    ├── MarketLivePrice.jsx
+    ├── OrderBook.jsx
+    ├── OrderModal.jsx
+    ├── TerminalLayout.jsx
+    ├── TopNav.jsx
+    └── Watchlist.jsx
 ```
 
 ### Component Inventory & Prop Interfaces
@@ -67,6 +76,17 @@ We strictly adhere to a **Smart Container / Dumb Component** architecture to ens
 - `Pricing.jsx`: Pricing tier display.
 - `Support.jsx`: Customer support and FAQs.
 - `About.jsx`: Information about DeepPulse.
+
+**Authentication Components**
+- `Login.jsx`: User logic for standard email login.
+- `signup.jsx`: User logic for registration.
+- `OnboardingPage.jsx`: Additional data gathering post-signup.
+
+**Orders Components**
+- `OrdersPageLayout.jsx`: Main orchestration container for order history.
+- `OrdersTable.jsx`: Smart table displaying active and completed orders.
+- `OrdersSummaryCards.jsx`: High-level metrics for order executions.
+- `OrderBookHeader.jsx`: Navigational controls for the orders page.
 
 **Dashboard Components (Portfolio & Holdings)**
 - `HoldingsLayout.jsx`: Smart container that fetches or receives data and orchestrates the child presentational components.
@@ -86,6 +106,7 @@ We strictly adhere to a **Smart Container / Dumb Component** architecture to ens
 - `TerminalLayout.jsx`: Main layout orchestrator for the trading terminal.
 - `TopNav.jsx`: Market indices, global search, and user profile summary.
 - `LeftNav.jsx`: Sidebar navigation.
+- `MarketLivePrice.jsx`: WebSocket context provider managing data ingestion via `ws`.
 - `Watchlist.jsx`: 
   - *Props*: `stocks` (Array of stock objects), `onSelectStock` (function), `onRemoveStock` (function).
 - `ChartArea.jsx`: Technical analysis chart integration.
@@ -114,7 +135,31 @@ We strictly adhere to a **Smart Container / Dumb Component** architecture to ens
 - **Watchlist State**: Active selected standard (e.g., Nifty 50 vs. custom watchlist), search query.
 - **HoldingsTable State**: Sorting column, sort direction, and pagination.
 
-## 4. Backend Architecture & Data Flow (Future State)
+## 4. Backend Architecture & Data Flow (Future State and Active Evolution)
+
+We follow a clean Model-View-Controller (MVC) + Services approach for our API layers.
+
+### Backend Directory Structure
+```
+/Backend
+├── app.js
+├── data.js
+├── /configs
+│   ├── dbconfig.js
+│   └── redisClient.mjs
+├── /models
+│   ├── OrderModel.js
+│   └── userModel.js
+├── /routes
+│   ├── authRoutes.js
+│   ├── googleAuth.js
+│   └── test.js
+└── /services
+    ├── googleAuthService.js
+    ├── jwtService.js
+    ├── middlewares.js
+    └── webSocketsService.js
+```
 
 ### REST API Routing Structure
 - **Auth Service**:
@@ -233,14 +278,14 @@ We strictly adhere to a **Smart Container / Dumb Component** architecture to ens
 
 ### Phase 3: API Backend Initialization (Node.js & MongoDB)
 - [x] Initialize Express.js backend repository.
-- [ ] Provision MongoDB clusters and create the Mongoose models (User, Order, Holdings, Ledger).
-- [ ] Implement JWT Authentication and build `/api/auth` endpoints.
+- [x] Provision MongoDB clusters and create the Mongoose models (User, Order, Holdings, Ledger).
+- [x] Implement JWT Authentication and build `/api/auth` endpoints.
 - [ ] Build atomic ledger transactions (ensure User cash balances logically map to DB sessions/transactions).
 - [ ] Develop `/api/orders` logic (Margin validation -> Database write).
 
 ### Phase 4: WebSocket Integration & Real-Time Sync
-- [ ] Integrate native WebSockets (ws) on the Node.js server with a Redis Pub/Sub adapter.
+- [x] Integrate native WebSockets (ws) on the Node.js server with a Redis Pub/Sub adapter.
 - [ ] Implement a Mock Tick Generator worker to continuously emit LTP updates to `live_feeds`.
-- [ ] Connect the React frontend to native WebSockets.
+- [x] Connect the React frontend to native WebSockets.
 - [ ] Subscribe `Watchlist.jsx` and `ChartArea.jsx` to live streams.
 - [ ] Implement visual flashes (green/red ticks) when prices change in the UI.

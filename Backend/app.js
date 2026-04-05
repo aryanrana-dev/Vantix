@@ -1,21 +1,83 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const Order = require("./models/order.js");
+import express from "express";
+import mongoose from "mongoose";
+import Order from "./models/order.js";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import client from "./configs/redisClient.mjs";
+import { initWebSockets } from "./services/webSocketsService.js";
+import { getGoogleAuthURL, getGoogleUserInfo } from "./services/googleAuthService.js";
+import { generateAccessToken, verifyAccessToken, generateRefreshToken } from "./services/jwtService.js";
+import "dotenv/config";
+
 const app = express();
-const cors = require("cors")
-const { WebSocketServer } = require("ws");
 const port = 3000;
-require("dotenv").config();
 
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser());
 
-main().catch(err => console.log(err))
+main().catch(err => console.log(err));
 
 async function main() {
     await mongoose.connect("mongodb://127.0.0.1:27017/vantix");
     console.log("Connected to MongoDB");
 }
+
+app.get("/auth/google", async (req, res) => {
+    const authUrl = getGoogleAuthURL();
+    res.redirect(authUrl);
+})
+
+app.get("/api/auth/google/callback", async (req, res) => {
+    const { code } = req.query;
+    const user = await getGoogleUserInfo(code);
+    console.log(user);
+    const token = generateRefreshToken();
+    res.cookie("refreshToken", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 5 * 60 * 1000
+    })
+    client.set("refreshToken", token, {
+        EX: 60
+    })
+    res.redirect("http://localhost:5173/terminal")
+})
+
+app.get("/api/token/refresh", async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    const storedToken = await client.get("refreshToken");
+    if (refreshToken !== storedToken) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+    const token = generateAccessToken({ name: "Aryan", age: "19" });
+    console.log("Called /refresh", token);
+    res.send(token);
+})
+
+app.get("/api/token/verify", (req, res) => {
+    const token = req.headers.authorization;
+    const decoded = verifyAccessToken(token);
+    if (decoded) {
+        res.json(decoded);
+    } else {
+        res.status(401).json({ message: "Unauthorized" });
+    }
+})
+
+app.get("/signout", async (req, res) => {
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict"
+    });
+    await client.del("refreshToken");
+    res.send({ success: true });
+})
 
 app.post("/orders", async (req, res) => {
     const data = req.body;
@@ -25,63 +87,26 @@ app.post("/orders", async (req, res) => {
     console.log("Order saved successfully");
 })
 
+app.get("/orders", async (req, res) => {
+    const orders = await Order.find();
+    res.json(orders);
+})
+
+app.get("/set", async (req, res) => {
+    await client.set("name", "Aryan");
+    res.send("Set successfully");
+})
+
+app.get("/get", async (req, res) => {
+    const keys = await client.keys("*");
+    const data = keys.map(async (key) => {
+        return await client.get(key);
+    })
+    res.send({ "keys": keys, "values": data });
+})
+
 const server = app.listen(port, () => {
     console.log("Listening to localhost:3000")
 })
 
-const wss = new WebSocketServer({ server });
-wss.on("connection", (ws) => {
-    console.log("Client connected");
-    let clientSymbols = [];
-    let intervalId = null;
-
-    const sendUpdate = async () => {
-        if (clientSymbols.length === 0) return;
-        try {
-            const marketData = await Promise.all(clientSymbols.map(async (symbol) => {
-                let stockURL = `https://financialmodelingprep.com/stable/quote?symbol=${symbol}&apikey=${process.env.STOCK_API_KEY_2}`;
-                let res = await fetch(stockURL);
-                let jsonArray = await res.json();
-                let json = Array.isArray(jsonArray) ? jsonArray[0] : jsonArray;
-
-                return {
-                    symbol: json?.symbol || symbol,
-                    name: json?.name || symbol,
-                    price: json?.price.toFixed(2) || 0,
-                    change: json?.change.toFixed(2) || 0,
-                    changePercent: json?.changePercentage.toFixed(2) || json?.changePercent.toFixed(2) || 0,
-                    high: json?.dayHigh.toFixed(2) || json?.high.toFixed(2) || 0,
-                    low: json?.dayLow.toFixed(2) || json?.low.toFixed(2) || 0,
-                    previousClose: json?.previousClose.toFixed(2) || json?.price.toFixed(2) || 0
-                };
-            }));
-            if (ws.readyState === 1) { // 1 is OPEN
-                ws.send(JSON.stringify(marketData));
-            }
-        } catch (error) {
-            console.log("Error fetching market data:", error);
-        }
-    };
-
-    ws.on("message", async (data) => {
-        try {
-            clientSymbols = JSON.parse(data.toString());
-            console.log("Subscribed to:", clientSymbols);
-
-            // Send immediate update
-            await sendUpdate();
-
-            // Setup interval if not already set
-            if (!intervalId) {
-                intervalId = setInterval(sendUpdate, 10000);
-            }
-        } catch (error) {
-            console.log("Error parsing symbols:", error);
-        }
-    });
-
-    ws.on("close", () => {
-        console.log("Client disconnected");
-        if (intervalId) clearInterval(intervalId);
-    });
-});
+const ws = initWebSockets(server);

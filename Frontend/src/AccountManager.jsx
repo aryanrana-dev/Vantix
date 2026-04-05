@@ -15,8 +15,13 @@ export function AccountManagerProvider({ children }) {
         await axios.post("http://localhost:3000/orders", newOrder);
     }
 
+    const fetchOrders = async () => {
+        const orders = await axios.get("http://localhost:3000/orders");
+        setOrders(orders.data);
+    }
+
     return (
-        <AccountManagerContext.Provider value={{ orders, updateOrders }}>
+        <AccountManagerContext.Provider value={{ orders, updateOrders, fetchOrders }}>
             {children}
         </AccountManagerContext.Provider>
     )
