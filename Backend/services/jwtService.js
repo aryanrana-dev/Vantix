@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import "dotenv/config";
 
 export function generateAccessToken(user) {
-    const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: 60 });
+    const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: 60 * 5 });
     return token;
 }
 

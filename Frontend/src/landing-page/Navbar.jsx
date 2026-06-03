@@ -18,7 +18,7 @@ const Navbar = ({
         </div>
 
         <div>
-          <button onClick={() => onRouteSelect('terminal')} className="bg-pulse-green hover:bg-[#059669] text-white px-5 py-2 rounded font-medium text-sm transition-colors">
+          <button onClick={() => onRouteSelect('signup')} className="bg-pulse-green hover:bg-[#059669] text-white px-5 py-2 rounded font-medium text-sm transition-colors">
             Start Trading
           </button>
         </div>

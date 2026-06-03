@@ -17,7 +17,7 @@ const Signup = () => {
       return;
     }
     console.log('Email Signup with:', email);
-    alert(`Signup process started for ${email}`);
+    window.location.href = "/onboarding";
   };
 
   return (

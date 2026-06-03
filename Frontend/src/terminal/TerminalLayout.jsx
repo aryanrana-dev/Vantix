@@ -8,7 +8,6 @@ import OrderBook from './OrderBook';
 import { WATCHLIST_STOCKS, STOCK_DETAILS, CHART_DATA } from './data';
 import OrderModal from './OrderModal';
 import { MarketLivePriceProvider } from './MarketLivePrice';
-import axios from 'axios';
 
 const TerminalLayout = ({
   // We can pipe props through if the parent dictates,
@@ -18,24 +17,6 @@ const TerminalLayout = ({
   const navigate = useNavigate();
   const [selectedStock, setSelectedStock] = useState('NVDA');
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-  const [token, setToken] = useState(null);
-  const gotToken = useRef(false);
-
-  useEffect(() => {
-    async function fetchAccessToken() {
-      const token = await axios.get("http://localhost:3000/api/token/refresh", {
-        withCredentials: true
-      })
-      if (token.data) {
-        setToken(token.data);
-        console.log(token.data);
-      }
-    }
-    if (!gotToken.current) {
-      fetchAccessToken();
-      gotToken.current = true;
-    }
-  }, [])
 
   // Routing Handler for shared bars
   const handleNavClick = (id) => {

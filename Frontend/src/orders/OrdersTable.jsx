@@ -1,4 +1,5 @@
-import { MoreVertical, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { MoreVertical, CheckCircle2, XCircle, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 
 const OrdersTable = ({
   orders = [],
@@ -10,6 +11,7 @@ const OrdersTable = ({
   startIndex = 1,
   endIndex = 10,
 }) => {
+  const [orderToCancel, setOrderToCancel] = useState(null);
   const getPageNumbers = () => {
     if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
     if (currentPage <= 3) return [1, 2, 3, 4, '...', totalPages];
@@ -119,7 +121,7 @@ const OrdersTable = ({
                           Edit order
                         </button>
                         <button
-                          onClick={(e) => { e.stopPropagation(); onActionClick({ ...order, actionType: 'cancel' }); }}
+                          onClick={(e) => { e.stopPropagation(); setOrderToCancel(order); }}
                           className="w-full text-left px-4 py-2.5 text-xs font-semibold text-red-500 hover:bg-red-500/10 transition-colors"
                         >
                           Cancel
@@ -176,6 +178,46 @@ const OrdersTable = ({
           </button>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {orderToCancel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md transition-all duration-300 animate-in fade-in">
+          <div className="bg-[#11131c] border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex flex-col items-center text-center">
+              {/* Warning Icon */}
+              <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4 text-red-500">
+                <AlertTriangle className="w-6 h-6 animate-pulse" />
+              </div>
+              
+              {/* Title / Message */}
+              <h3 className="text-lg font-bold text-white mb-2">Do you want to cancel the order?</h3>
+              <p className="text-xs text-pulse-text-muted mb-6 leading-relaxed">
+                This will cancel your <span className="font-bold text-white">{orderToCancel.action}</span> order for <span className="font-bold text-white">{orderToCancel.qty} shares</span> of <span className="font-bold text-white">{orderToCancel.symbol}</span>. This action cannot be undone.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="flex w-full gap-3">
+                <button
+                  onClick={() => setOrderToCancel(null)}
+                  className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 hover:bg-white/5 text-xs font-semibold text-white transition-all cursor-pointer"
+                >
+                  Go back
+                </button>
+                <button
+                  onClick={async () => {
+                    const targetOrder = orderToCancel;
+                    setOrderToCancel(null);
+                    await onActionClick({ ...targetOrder, actionType: 'cancel' });
+                  }}
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 active:bg-red-700 text-xs font-semibold text-white transition-all shadow-lg shadow-red-500/20 cursor-pointer"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

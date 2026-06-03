@@ -1,16 +1,23 @@
 import express from "express";
 import mongoose from "mongoose";
 import Order from "./models/order.js";
+import User from "./models/user.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import ejs from "ejs";
+import path from "path";
 import client from "./configs/redisClient.mjs";
 import { initWebSockets } from "./services/webSocketsService.js";
 import { getGoogleAuthURL, getGoogleUserInfo } from "./services/googleAuthService.js";
 import { generateAccessToken, verifyAccessToken, generateRefreshToken } from "./services/jwtService.js";
+import { authenticateToken } from "./services/middlewares.js";
 import "dotenv/config";
 
 const app = express();
 const port = 3000;
+
+app.set("view engine", "ejs");
+app.set("views", path.join(path.resolve(), "views"));
 
 app.use(cors({
     origin: "http://localhost:5173",
@@ -38,24 +45,33 @@ app.get("/api/auth/google/callback", async (req, res) => {
     const token = generateRefreshToken();
     res.cookie("refreshToken", token, {
         httpOnly: true,
-        secure: true,
-        sameSite: "strict",
+        secure: false,
+        sameSite: "lax",
         maxAge: 5 * 60 * 1000
     })
-    client.set("refreshToken", token, {
-        EX: 60
+    let existingUser = await User.findOne({ email: user.email });
+    if (!existingUser) {
+        let newUser = new User(user);
+        await newUser.save();
+        console.log("User saved successfully");
+    } else {
+        console.log("User already exists");
+    }
+    let info = await User.findOne({ email: user.email });
+    let id = info.id;
+    await client.set(`refreshToken:${token}`, id, {
+        EX: 5 * 60
     })
-    res.redirect("http://localhost:5173/terminal")
+    res.redirect("http://localhost:5173/terminal");
 })
 
 app.get("/api/token/refresh", async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
-    const storedToken = await client.get("refreshToken");
-    if (refreshToken !== storedToken) {
+    const userId = await client.get(`refreshToken:${refreshToken}`);
+    if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
     }
-    const token = generateAccessToken({ name: "Aryan", age: "19" });
-    console.log("Called /refresh", token);
+    const token = generateAccessToken({ userId });
     res.send(token);
 })
 
@@ -72,30 +88,51 @@ app.get("/api/token/verify", (req, res) => {
 app.get("/signout", async (req, res) => {
     res.clearCookie("refreshToken", {
         httpOnly: true,
-        secure: true,
-        sameSite: "strict"
+        secure: false,
+        sameSite: "lax"
     });
     await client.del("refreshToken");
     res.send({ success: true });
 })
 
-app.post("/orders", async (req, res) => {
+app.post("/orders", authenticateToken, async (req, res) => {
     const data = req.body;
     console.log(data);
     let newOrder = new Order(data);
     await newOrder.save();
     console.log("Order saved successfully");
+    res.status(201).json({ message: "Order placed successfully", order: newOrder });
 })
 
-app.get("/orders", async (req, res) => {
+app.get("/orders", authenticateToken, async (req, res) => {
     const orders = await Order.find();
     res.json(orders);
 })
 
-app.get("/set", async (req, res) => {
-    await client.set("name", "Aryan");
-    res.send("Set successfully");
+app.patch("/orders/:id", authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedOrder = await Order.findByIdAndUpdate(id, { status: "CLOSED" });
+        if (!updatedOrder) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+        console.log("Order updated successfully", updatedOrder);
+        res.json({ message: "Order updated successfully", order: updatedOrder });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
 })
+
+app.get("/office", async (req, res) => {
+    const data = await Order.find();
+    res.render("office", { data });
+})
+
+// app.get("/set", async (req, res) => {
+//     await client.set("name", "Aryan");
+//     res.send("Set successfully");
+// })
 
 app.get("/get", async (req, res) => {
     const keys = await client.keys("*");

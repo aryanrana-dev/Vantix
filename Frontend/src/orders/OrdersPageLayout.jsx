@@ -27,7 +27,7 @@ const OrdersPageLayout = ({
   summaryStats = MOCK_SUMMARY,
 }) => {
   const navigate = useNavigate();
-  const { orders, fetchOrders } = useAccountManager() || {};
+  const { orders, fetchOrders, cancelOrder } = useAccountManager() || {};
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -57,6 +57,14 @@ const OrdersPageLayout = ({
     if (id === 'markets' || id === 'watchlist') navigate('/terminal');
     if (id === 'portfolio' || id === 'holdings' || id === 'dashboard') navigate('/portfolio');
     if (id === 'orders') navigate('/orders');
+  };
+
+  const handleActionClick = async (order) => {
+    if (order.actionType === 'cancel') {
+      if (cancelOrder) {
+        await cancelOrder(order._id);
+      }
+    }
   };
 
   return (
@@ -90,7 +98,7 @@ const OrdersPageLayout = ({
             {/* Data Table Section */}
             <OrdersTable
               orders={paginatedOrders}
-              onActionClick={() => { }}
+              onActionClick={handleActionClick}
               onPageChange={handlePageChange}
               currentPage={actualCurrentPage}
               totalPages={totalPages}

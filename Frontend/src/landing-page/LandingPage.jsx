@@ -27,7 +27,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   const handleNavClick = (id) => {
-    if (id == 'terminal') navigate('/terminal');
+    if (id == 'signup') navigate('/signup');
   }
 
   return (

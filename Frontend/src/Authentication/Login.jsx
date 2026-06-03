@@ -123,7 +123,7 @@ const Login = () => {
 
           {/* Registration Link */}
           <div className="mt-8 text-xs text-center text-pulse-text-muted uppercase tracking-widest font-semibold">
-            New to Vantix? <Link to="/onboarding" className="text-pulse-green hover:text-[#0fd08c] transition-colors ml-1">Initialize Here</Link>
+            New to Vantix? <Link to="/signup" className="text-pulse-green hover:text-[#0fd08c] transition-colors ml-1">Initialize Here</Link>
           </div>
         </div>
       </div>
